@@ -1,52 +1,44 @@
 import { Box, Button, Divider, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { setIsLoggedIn, setLoggedInUser, setToken } from "../Store/Slices/dataSlice";
+import { SIGNUP } from "../graphql/mutation";
 import { useMutation } from "@apollo/client";
-import { LOGIN } from "../graphql/mutation";
 import toast from "react-hot-toast";
 
-const LoginPage = () => {
-  const [loginFormData, setLoginFormData] = useState({});
-
-  const dispatch = useDispatch();
+const SignUpPage = () => {
   const navigate = useNavigate();
 
-  const [loginFunc, { data, loading, error }] = useMutation(LOGIN, {
-    onCompleted: (data) => {
-      toast.success("Login Successful");
-      localStorage.setItem("accessToken", JSON.stringify(data.login.accessToken));
-      localStorage.setItem("refreshToken", JSON.stringify(data.login.refreshToken));
-      dispatch(setIsLoggedIn({ isLoggedIn: true }));
-      dispatch(
-        setToken({
-          accessToken: data.login.accessToken,
-          refreshToken: data.login.refreshToken,
-        })
-      );
-      dispatch(setLoggedInUser({loggedInUser: data.login.loggedInUser}))
-      navigate("/");
+  const [signUpFunc, { data, loading, error }] = useMutation(SIGNUP, {
+    onCompleted: () => {
+      toast.success("SignUp Successful");
+      navigate("/auth/login");
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
 
+  const [signUpFormData, setSignUpFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
   const handleChange = (e) => {
-    setLoginFormData({ ...loginFormData, [e.target.name]: e.target.value });
+    setSignUpFormData({ ...signUpFormData, [e.target.name]: e.target.value });
   };
   const handleSubmit = () => {
-    loginFunc({
+    //   console.log(signUpFormData)
+    signUpFunc({
       variables: {
-        input: { ...loginFormData },
+        input: { ...signUpFormData },
       },
     });
   };
   return (
     <>
       <Box
-        type={FormData}
+        // type={FormData}
         display={"flex"}
         flexDirection={"column"}
         width={"30%"}
@@ -57,14 +49,23 @@ const LoginPage = () => {
           borderRadius: "10px",
         }}
       >
-        <Typography variant="h5">Login: </Typography>
+        <Typography variant="h5">SignUp: </Typography>
+        <TextField
+          size="small"
+          label="name"
+          variant="outlined"
+          type="text"
+          name="name"
+          value={signUpFormData.name}
+          onChange={(e) => handleChange(e)}
+        />
         <TextField
           size="small"
           label="email"
           variant="outlined"
           type="email"
           name="email"
-          value={loginFormData.email}
+          value={signUpFormData.email}
           onChange={(e) => handleChange(e)}
         />
         <TextField
@@ -73,7 +74,7 @@ const LoginPage = () => {
           variant="outlined"
           type="password"
           name="password"
-          value={loginFormData.password}
+          value={signUpFormData.password}
           onChange={(e) => handleChange(e)}
         />
         <Divider />
@@ -84,14 +85,14 @@ const LoginPage = () => {
           color="primary"
           type="submit"
         >
-          Login
+          SignUp
         </Button>
         <Box display={"flex"} justifyContent={"end"}>
-          <Link to="/auth/register">Don't have an account? Register</Link>
+          <Link to="/auth/login">Already have an account? Login</Link>
         </Box>
       </Box>
     </>
   );
 };
 
-export default LoginPage;
+export default SignUpPage;

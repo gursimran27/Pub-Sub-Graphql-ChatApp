@@ -13,7 +13,7 @@ const Authlayout = () => {
         height="100vh"
         width="100vw"
         sx={{
-          backgroundColor: "#c9f8f5",
+          backgroundColor: "lightgray",
         }}
       >
         <Outlet />

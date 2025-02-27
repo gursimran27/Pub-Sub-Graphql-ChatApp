@@ -1,40 +1,55 @@
 import { Box, Button, Divider, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { SIGNUP } from "../graphql/mutation";
+import { setIsLoggedIn, setLoggedInUser, setToken } from "../Store/Slices/dataSlice";
 import { useMutation } from "@apollo/client";
+import { LOGIN } from "../graphql/mutation";
 import toast from "react-hot-toast";
 
-const SignUpPage = () => {
+const LoginPage = () => {
+  const [loginFormData, setLoginFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [signUpFunc, { data, loading, error }] = useMutation(SIGNUP, {
-    onCompleted: () => {
-      toast.success("SignUp Successful");
-      navigate("/auth/login");
+  const [loginFunc, { data, loading, error }] = useMutation(LOGIN, {
+    onCompleted: (data) => {
+      toast.success("Login Successful");
+      localStorage.setItem("accessToken", JSON.stringify(data.login.accessToken));
+      localStorage.setItem("refreshToken", JSON.stringify(data.login.refreshToken));
+      dispatch(setIsLoggedIn({ isLoggedIn: true }));
+      dispatch(
+        setToken({
+          accessToken: data.login.accessToken,
+          refreshToken: data.login.refreshToken,
+        })
+      );
+      dispatch(setLoggedInUser({loggedInUser: data.login.loggedInUser}))
+      navigate("/");
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
 
-  const [signUpFormData, setSignUpFormData] = useState({});
-
   const handleChange = (e) => {
-    setSignUpFormData({ ...signUpFormData, [e.target.name]: e.target.value });
+    setLoginFormData({ ...loginFormData, [e.target.name]: e.target.value });
   };
   const handleSubmit = () => {
-    //   console.log(signUpFormData)
-    signUpFunc({
+    loginFunc({
       variables: {
-        input: { ...signUpFormData },
+        input: { ...loginFormData },
       },
     });
   };
   return (
     <>
       <Box
-        type={FormData}
+        // type={FormData}
         display={"flex"}
         flexDirection={"column"}
         width={"30%"}
@@ -45,23 +60,14 @@ const SignUpPage = () => {
           borderRadius: "10px",
         }}
       >
-        <Typography variant="h5">SignUp: </Typography>
-        <TextField
-          size="small"
-          label="name"
-          variant="outlined"
-          type="text"
-          name="name"
-          value={signUpFormData.name}
-          onChange={(e) => handleChange(e)}
-        />
+        <Typography variant="h5">Login: </Typography>
         <TextField
           size="small"
           label="email"
           variant="outlined"
           type="email"
           name="email"
-          value={signUpFormData.email}
+          value={loginFormData?.email}
           onChange={(e) => handleChange(e)}
         />
         <TextField
@@ -70,7 +76,7 @@ const SignUpPage = () => {
           variant="outlined"
           type="password"
           name="password"
-          value={signUpFormData.password}
+          value={loginFormData?.password}
           onChange={(e) => handleChange(e)}
         />
         <Divider />
@@ -81,14 +87,14 @@ const SignUpPage = () => {
           color="primary"
           type="submit"
         >
-          SignUp
+          Login
         </Button>
         <Box display={"flex"} justifyContent={"end"}>
-          <Link to="/auth/login">Already have an account? Login</Link>
+          <Link to="/auth/register">Don't have an account? Register</Link>
         </Box>
       </Box>
     </>
   );
 };
 
-export default SignUpPage;
+export default LoginPage;

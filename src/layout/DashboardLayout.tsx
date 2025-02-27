@@ -7,9 +7,10 @@ import { useSubscription } from "@apollo/client";
 import { useDispatch, useSelector } from "react-redux";
 import { updateMessages } from "../Store/Slices/dataSlice";
 import toast from "react-hot-toast";
+import { RootState } from "../Store/store";
 
 const DashboardLayout = () => {
-  const {loggedInUser, currentChatUser} = useSelector((state) => state.chat);
+  const {loggedInUser, currentChatUser} = useSelector((state: RootState) => state.chat);
   const dispatch = useDispatch();
 
   const {
@@ -18,6 +19,7 @@ const DashboardLayout = () => {
     error: newMsgError,
   } = useSubscription(MESSAGE_SENT, {
     onSubscriptionData: (data) => {
+      console.log(data,"................................");
       if (loggedInUser && currentChatUser) {
         if (
           (currentChatUser.id ==

@@ -10,7 +10,7 @@ import NotFound from "./components/NotFound";
 import OpenRoute from "./components/OpenRoute";
 import PrivateRoute from "./components/PrivateRoute";
 
-function App() {
+const App: React.FC = () => {
   return useRoutes([
     {
       path: "/auth",
@@ -49,7 +49,7 @@ function App() {
           ),
         },
         {
-          path: "/app/receiverId/:id/name/:name",
+          path: "app/receiverId/:id/name/:name",
           element: (
             <PrivateRoute>
               <ChatScreenPage />
@@ -63,6 +63,6 @@ function App() {
       element: <NotFound />,
     },
   ]);
-}
+};
 
 export default App;
