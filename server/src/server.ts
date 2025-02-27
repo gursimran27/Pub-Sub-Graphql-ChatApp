@@ -5,7 +5,7 @@ import { resolvers } from "./graphql/resolvers";
 import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 
 import { WebSocketServer } from "ws";
@@ -20,7 +20,7 @@ dotenv.config();
 const app = express() as Application;
 app.use(
   cors({
-    origin: "http://localhost:5173",//"*" (wildcard) cannot be used with credentials: true.
+    origin: "*",//"*" (wildcard) cannot be used with credentials: true.
     credentials: true, // Allow cookies
   })
 );
@@ -30,8 +30,8 @@ app.use(express.json());
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI as string)
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB Connection Error:", err));
 
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
@@ -50,7 +50,8 @@ async function startServer() {
       //act as a middleware
       const { authorization } = req.headers;
       if (authorization) {
-        const { userId } = jwt.verify(authorization, process.env.JWT_SECRET);
+        const decoded = jwt.verify(authorization, process.env.JWT_SECRET ?? "DEll") as JwtPayload;
+        const userId = decoded.userId;
         if (!userId) throw new Error("Invalid Token");
         return {
           isLoggedIn: true,
@@ -71,7 +72,7 @@ async function startServer() {
   server.applyMiddleware({ app, path: "/graphql", cors: false  });
 
   httpServer.listen(4000, () => {
-    console.log(`🚀 Server ready at http://localhost:4000/graphql`);
+    console.log(`Server ready at http://localhost:4000/graphql`);
   });
   app.get("/", (req, res) => {
     res.json({ message: "Server is running" });

@@ -8,7 +8,7 @@ import { PubSub, withFilter } from "graphql-subscriptions";
 const pubsub = new PubSub();
 
 const generateAccessToken = (user: any) => {
-  return jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+  return jwt.sign({ userId: user._id }, process.env.JWT_SECRET , {
     expiresIn: process.env.JWT_ACCESS_EXPIRATION_TIME,
   });
 };
@@ -43,7 +43,7 @@ export const resolvers = {
 
         // Save user to the database
         const savedUser = await user.save();
-
+        
         return savedUser;
       } catch (error) {
         console.error("Error during signup:", error);
