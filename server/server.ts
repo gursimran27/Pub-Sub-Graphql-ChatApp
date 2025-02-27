@@ -1,7 +1,13 @@
 import express, { Application } from "express";
 import { ApolloServer } from "apollo-server-express"; // Use ApolloServer from 'apollo-server-express'
-import { typeDefs } from "./graphql/schema";
-import { resolvers } from "./graphql/resolvers";
+// import { typeDefs } from "./src/graphql/schema";
+// import { resolvers } from "./src/graphql/resolvers";
+import { mergeTypeDefs } from "@graphql-tools/merge";
+import { userTypeDef } from "./src/User/user-typedef";
+import { messageTypeDef } from "./src/Message/message-typedef";
+import { userResolvers } from "./src/User/user-resolver";
+import { messageResolvers } from "./src/Message/message-resolver";
+import { mergeResolvers } from "@graphql-tools/merge";
 import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
@@ -20,7 +26,8 @@ dotenv.config();
 const app = express() as Application;
 app.use(
   cors({
-    origin: "*",//"*" (wildcard) cannot be used with credentials: true.
+    // origin: "http://localhost:5173",
+    origin: "*",
     credentials: true, // Allow cookies
   })
 );
@@ -33,6 +40,8 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB Connection Error:", err));
 
+const typeDefs = mergeTypeDefs([userTypeDef, messageTypeDef]);
+const resolvers = mergeResolvers([userResolvers, messageResolvers]);
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 async function startServer() {
@@ -50,7 +59,10 @@ async function startServer() {
       //act as a middleware
       const { authorization } = req.headers;
       if (authorization) {
-        const decoded = jwt.verify(authorization, process.env.JWT_SECRET ?? "DEll") as JwtPayload;
+        const decoded = jwt.verify(
+          authorization,
+          process.env.JWT_SECRET ?? "DEll"
+        ) as JwtPayload;
         const userId = decoded.userId;
         if (!userId) throw new Error("Invalid Token");
         return {
@@ -69,7 +81,7 @@ async function startServer() {
   await server.start();
 
   // Apply Apollo Server middleware to Express
-  server.applyMiddleware({ app, path: "/graphql", cors: false  });
+  server.applyMiddleware({ app, path: "/graphql", cors: false });
 
   httpServer.listen(4000, () => {
     console.log(`Server ready at http://localhost:4000/graphql`);

@@ -1,12 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { IMessage } from './message.dto';
 
-// Define the Message interface that extends the mongoose Document
-interface IMessage extends Document {
-  sender: mongoose.Types.ObjectId;
-  receiver: mongoose.Types.ObjectId;
-  content: string;
-  timestamp: Date;
-}
 
 // Define the Message Schema
 const messageSchema: Schema = new Schema(

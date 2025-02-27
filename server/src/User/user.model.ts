@@ -1,14 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-
-// Define the User interface that extends the mongoose Document
-interface IUser extends Document {
-  name: string;
-  email: string;
-  password: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { IUser } from './user.dto';
 
 // Define the User Schema
 const userSchema: Schema = new Schema(

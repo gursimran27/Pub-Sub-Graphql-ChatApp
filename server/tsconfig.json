@@ -3,7 +3,7 @@
       "target": "ES6",
       "module": "Node16",
       "outDir": "./dist",
-      "rootDir": "./src",
+      // "rootDir": "./src",
       "strict": true,
       "esModuleInterop": true,
       "skipLibCheck": true,
